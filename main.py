@@ -46,18 +46,17 @@ class MainPage(webapp2.RequestHandler):
 class ClarifaiWrapper(webapp2.RequestHandler):
 
   def post(self):
+    logging.info('Starting post request handler.')
     CLARIFAI_KEY = Settings.get('CLARIFAI_API_KEY')
-    # clarifai_app = ClarifaiApp(api_key=CLARIFAI_API_KEY)
-    # model = clarifai_app.models.get("general-v1.3")
-
+    clarifai_app = ClarifaiApp(api_key=CLARIFAI_KEY)
+    logging.info('CLARIFAI App setup.')
+    model = clarifai_app.models.get("general-v1.3")
+    logging.info('CLARIFAI Models instatiated.')
     image_url = self.request.get('image_url')
     image_category = self.request.get('image_category')
 
-    # predict with the model
-    # prediction = model.predict_by_url(url='https://samples.clarifai.com/metro-north.jpg')
-    # logging.info('Prediction: \n%s', prediction)
-    # Output response of application-3 to screen
-    logging.info('Request incoming: %s', self.request)
+    prediction = model.predict_by_url(url='https://samples.clarifai.com/metro-north.jpg')
+    logging.info('Prediction: \n%s', prediction)
     self.response.headers['Content-Type'] = 'text/plain'
     self.response.write("you sent: " + image_category)
 
