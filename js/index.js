@@ -1,10 +1,13 @@
 `use strict`
 
-function docReady() {
+// Object to control namespace issues.
+var CVA__ = {}
+
+CVA__.docReady = function() {
   console.log('Im ready!');
 };
 
-function testClarifai() {
+CVA__.testClarifai = function() {
   const data = {
     'image_url': 'https://samples.clarifai.com/metro-north.jpg',
     'image_category': 'dogs'
@@ -15,4 +18,4 @@ function testClarifai() {
 }
 
 
-$(docReady)
+$(CVA__.docReady)

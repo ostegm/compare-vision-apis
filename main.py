@@ -3,9 +3,12 @@ import os
 import urllib
 import jinja2
 import webapp2
-from clarifai.rest import ClarifaiApp
+import json
+# from clarifai.rest import ClarifaiApp
 from google.appengine.ext import ndb
-
+import requests
+import requests_toolbelt.adapters.appengine
+requests_toolbelt.adapters.appengine.monkeypatch()
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -46,19 +49,35 @@ class MainPage(webapp2.RequestHandler):
 class ClarifaiWrapper(webapp2.RequestHandler):
 
   def post(self):
-    logging.info('Starting post request handler.')
-    CLARIFAI_KEY = Settings.get('CLARIFAI_API_KEY')
-    clarifai_app = ClarifaiApp(api_key=CLARIFAI_KEY)
-    logging.info('CLARIFAI App setup.')
-    model = clarifai_app.models.get("general-v1.3")
-    logging.info('CLARIFAI Models instatiated.')
+    # logging.info('Starting post request handler.')
+    # CLARIFAI_KEY = Settings.get('CLARIFAI_API_KEY')
+    # # model = clarifai_app.models.get("general-v1.3")
+    # # logging.info('CLARIFAI Models instatiated.')
     image_url = self.request.get('image_url')
     image_category = self.request.get('image_category')
 
-    prediction = model.predict_by_url(url='https://samples.clarifai.com/metro-north.jpg')
-    logging.info('Prediction: \n%s', prediction)
+    # prediction = model.predict_by_url(url='https://samples.clarifai.com/metro-north.jpg')
+    headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Key be333133d4e444dea5545f60c06bea89',
+    }
+    data = json.dumps({
+       "inputs": [
+         {
+           "data": {
+             "image": {
+               "url": "https://samples.clarifai.com/metro-north.jpg"
+             }
+           }
+         }
+       ]
+     })
+    logging.info(data)
+    c_url = 'https://api.clarifai.com/v2/models/aaa03c23b3724a16a56b629203edc62c/outputs'
+    response = requests.post(c_url, data=data, headers=headers)
+    logging.info('Prediction: \n%s', response.content)
     self.response.headers['Content-Type'] = 'text/plain'
-    self.response.write("you sent: " + image_category)
+    self.response.write("you sent: " + response.content)
 
 
 app = webapp2.WSGIApplication([
