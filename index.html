@@ -8,7 +8,13 @@
 <body>
   <h1>Compare Vision APIs</h1>
   <main role="main">
-    <p> Gotta start somewhere, right?</p>
+  	<div class="container">
+		<form action="/clarifai" name="clarifai-form" class="search-box" method="post">
+			<label for="clarifai-url">Enter an image URL to classify</label>
+			<input id ="clarifai-url" type="text" name="image_url" placeholder="https://samples.clarifai.com/metro-north.jpg" required>
+			<button class="js-submit-clarifai">Classify Image</button>
+		</form>
+	</div>
   </main>  
 </body>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
