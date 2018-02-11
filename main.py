@@ -1,12 +1,10 @@
+"""The main python server which routes requests from the fontend to vapis."""
 import logging
 import os
-import urllib
 import jinja2
 import webapp2
-import json
-# from clarifai.rest import ClarifaiApp
+from clarifai.rest import ClarifaiApp
 from google.appengine.ext import ndb
-import requests
 import requests_toolbelt.adapters.appengine
 requests_toolbelt.adapters.appengine.monkeypatch()
 
@@ -18,30 +16,32 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 
 class Settings(ndb.Model):
   """Helper class to get or set values in datastore."""
-
   name = ndb.StringProperty()
   value = ndb.StringProperty()
 
   @staticmethod
   def get(name):
-    NOT_SET_VALUE = "NOT SET"
+    """Checks for key in db, if present returns the value, otherwise alerts."""
+    not_set_value = "NOT SET"
     retval = Settings.query(Settings.name == name).get()
     if not retval:
       retval = Settings()
       retval.name = name
-      retval.value = NOT_SET_VALUE
+      retval.value = not_set_value
       retval.put()
-    if retval.value == NOT_SET_VALUE:
-      raise Exception(('Setting %s not found in the database. A placeholder ' +
-        'record has been created. Go to the Developers Console for your app ' +
-        'in App Engine, look up the Settings record with name=%s and enter ' +
-        'its value in that record\'s value field.') % (name, name))
+    if retval.value == not_set_value:
+      raise Exception(
+          'Setting %s not found in the database. Use the app engine developer' +
+          'console and add a value.' %(name)
+      )
     return retval.value
 
 
 class MainPage(webapp2.RequestHandler):
+  """Renders the main page template."""
 
   def get(self):
+    """Loads and shows the main page."""
     template = JINJA_ENVIRONMENT.get_template('index.html')
     self.response.write(template.render())
 
@@ -49,38 +49,20 @@ class MainPage(webapp2.RequestHandler):
 class ClarifaiWrapper(webapp2.RequestHandler):
 
   def post(self):
-    # logging.info('Starting post request handler.')
-    # CLARIFAI_KEY = Settings.get('CLARIFAI_API_KEY')
-    # # model = clarifai_app.models.get("general-v1.3")
-    # # logging.info('CLARIFAI Models instatiated.')
+    """Responds to post request with clarifai prediction"""
+    logging.info('Request: %s', self.request)
+    clarifai_key = Settings.get('CLARIFAI_API_KEY')
+    clarifai_app = ClarifaiApp(api_key=clarifai_key)
+    model = clarifai_app.models.get("general-v1.3")
     image_url = self.request.get('image_url')
     image_category = self.request.get('image_category')
-
-    # prediction = model.predict_by_url(url='https://samples.clarifai.com/metro-north.jpg')
-    headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Key be333133d4e444dea5545f60c06bea89',
-    }
-    data = json.dumps({
-       "inputs": [
-         {
-           "data": {
-             "image": {
-               "url": "https://samples.clarifai.com/metro-north.jpg"
-             }
-           }
-         }
-       ]
-     })
-    logging.info(data)
-    c_url = 'https://api.clarifai.com/v2/models/aaa03c23b3724a16a56b629203edc62c/outputs'
-    response = requests.post(c_url, data=data, headers=headers)
-    logging.info('Prediction: \n%s', response.content)
+    prediction = model.predict_by_url(url=image_url)
+    logging.info('Prediction from clarifai app: %s', prediction)
     self.response.headers['Content-Type'] = 'text/plain'
-    self.response.write("you sent: " + response.content)
+    self.response.write("Clarifai app prediction: " + str(prediction))
 
 
 app = webapp2.WSGIApplication([
-  ('/', MainPage),
-  ('/clarifai', ClarifaiWrapper),
+    ('/', MainPage),
+    ('/clarifai', ClarifaiWrapper),
 ], debug=True)
