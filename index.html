@@ -9,12 +9,16 @@
   <h1>Compare Vision APIs</h1>
   <main role="main">
   	<div class="container">
-		<form action="/clarifai" name="clarifai-form" class="search-box" method="post">
-			<label for="clarifai-url">Enter an image URL to classify</label>
-			<input id ="clarifai-url" type="text" name="image_url" placeholder="https://samples.clarifai.com/metro-north.jpg" required>
-			<button class="js-submit-clarifai">Classify Image</button>
+    <p>Test url: https://cdn.pixabay.com/photo/2015/02/05/12/09/chihuahua-624924_960_720.jpg</p>
+		<form action="" name="classify-form" class="search-box" method="post">
+			<label for="image-url">Enter an image URL to classify</label>
+			<input id ="image-url" type="text" name="image_url" placeholder="https://samples.clarifai.com/metro-north.jpg" required>
+			<button class="js-submit-image">Classify Image</button>
 		</form>
-	</div>
+    </div>
+    <div class="js-clarifai-results" hidden></div>
+    <div class="google-results" hidden></div>
+    <div class="amazon-results" hidden></div>
   </main>  
 </body>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>

@@ -1,10 +1,12 @@
 """The main python server which routes requests from the fontend to vapis."""
 import logging
 import os
+import json
 import jinja2
 import webapp2
 from clarifai.rest import ClarifaiApp
 from google.appengine.ext import ndb
+import requests
 import requests_toolbelt.adapters.appengine
 requests_toolbelt.adapters.appengine.monkeypatch()
 
@@ -12,6 +14,16 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
+
+
+def make_google_data(url):
+  """Constructs the data object for a post request to Google Vision API."""
+  image_data = {
+      "image": {"source": {"imageUri": url}},
+      "features": [{"type": "LABEL_DETECTION"}]
+  }
+  data = {"requests": [image_data]}
+  return json.dumps(data)
 
 
 class Settings(ndb.Model):
@@ -31,8 +43,8 @@ class Settings(ndb.Model):
       retval.put()
     if retval.value == not_set_value:
       raise Exception(
-          'Setting %s not found in the database. Use the app engine developer' +
-          'console and add a value.' %(name)
+          'Setting %s not found in the database.' %(name) + 
+          'Use the app engine developer console and add a value.' 
       )
     return retval.value
 
@@ -47,22 +59,38 @@ class MainPage(webapp2.RequestHandler):
 
 
 class ClarifaiWrapper(webapp2.RequestHandler):
+  """Wrapper class to send post request to Clarifai vision api."""
 
   def post(self):
-    """Responds to post request with clarifai prediction"""
-    logging.info('Request: %s', self.request)
+    """Responds to post request with clarifai prediction/"""
     clarifai_key = Settings.get('CLARIFAI_API_KEY')
     clarifai_app = ClarifaiApp(api_key=clarifai_key)
     model = clarifai_app.models.get("general-v1.3")
-    image_url = self.request.get('image_url')
-    image_category = self.request.get('image_category')
+    image_url = self.request.get('imageUrl')
     prediction = model.predict_by_url(url=image_url)
     logging.info('Prediction from clarifai app: %s', prediction)
     self.response.headers['Content-Type'] = 'text/plain'
-    self.response.write("Clarifai app prediction: " + str(prediction))
+    self.response.write(prediction)
 
+
+class GoogleWrapper(webapp2.RequestHandler):
+  """Wrapper class to send an image classification request to Google."""
+
+  def post(self):
+    """Responds to post request with Google Vision API prediction"""
+    google_key = Settings.get('GOOGLE_API_KEY')
+    headers = {
+        'Content-Type': 'application/json',
+    }
+    image_url = self.request.get('imageUrl')
+    data = make_google_data(image_url)
+    url = 'https://vision.googleapis.com/v1/images:annotate?key=' + google_key
+    response = requests.post(url, data=data, headers=headers)
+    self.response.headers['Content-Type'] = 'text/plain'
+    self.response.write(response.content)
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/clarifai', ClarifaiWrapper),
+    ('/google', GoogleWrapper)
 ], debug=True)
