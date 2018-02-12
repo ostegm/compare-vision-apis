@@ -66,7 +66,7 @@ class ClarifaiWrapper(webapp2.RequestHandler):
     clarifai_key = Settings.get('CLARIFAI_API_KEY')
     clarifai_app = ClarifaiApp(api_key=clarifai_key)
     model = clarifai_app.models.get("general-v1.3")
-    image_url = self.request.get('image_url')
+    image_url = self.request.get('imageUrl')
     prediction = model.predict_by_url(url=image_url)
     logging.info('Prediction from clarifai app: %s', prediction)
     self.response.headers['Content-Type'] = 'text/plain'
@@ -82,7 +82,7 @@ class GoogleWrapper(webapp2.RequestHandler):
     headers = {
         'Content-Type': 'application/json',
     }
-    image_url = self.request.get('image_url')
+    image_url = self.request.get('imageUrl')
     data = make_google_data(image_url)
     url = 'https://vision.googleapis.com/v1/images:annotate?key=' + google_key
     response = requests.post(url, data=data, headers=headers)
