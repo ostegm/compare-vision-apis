@@ -4,7 +4,6 @@ import os
 import json
 import jinja2
 import webapp2
-from clarifai.rest import ClarifaiApp
 from google.appengine.ext import ndb
 import requests
 import requests_toolbelt.adapters.appengine
