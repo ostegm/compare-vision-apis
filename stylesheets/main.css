@@ -45,3 +45,16 @@ h1 {
   border-radius: 4%;
   min-height: 35px;
 }
+
+.results-item {
+  display: inline-block;
+  width: 400px;
+  min-height: 400px;
+}
+
+.results img {
+  width: 120px;
+  height: 120px;
+  display: block;
+
+}
