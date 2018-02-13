@@ -71,6 +71,7 @@ class ClarifaiWrapper(webapp2.RequestHandler):
   """Wrapper class to send post request to Clarifai vision api."""
 
   def post(self):
+    """Responds to post request with Clarifai prediction"""
     clarifai_key = Settings.get('CLARIFAI_API_KEY')
     image_url = self.request.get('imageUrl')
     headers, data = make_clarifai_data(image_url, clarifai_key)
@@ -94,7 +95,7 @@ class GoogleWrapper(webapp2.RequestHandler):
     self.response.headers['Content-Type'] = 'text/json'
     self.response.write(response.content)
 
-app = webapp2.WSGIApplication([
+app = webapp2.WSGIApplication([  # pylint: disable=invalid-name
     ('/', MainPage),
     ('/clarifai', ClarifaiWrapper),
     ('/google', GoogleWrapper)

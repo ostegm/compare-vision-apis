@@ -63,7 +63,19 @@ CVA__.parseResponse = function (labelObjects, labelFieldName, scoreFieldName, $c
     };
   });
 
-  $container.append(`<pre>${JSON.stringify(labelsList, null, 2)}</pre>`);
+  const tableHtml = CVA__.makeTable(labelsList);
+  $container.append(tableHtml);
+};
+
+CVA__.makeTable = function (labelsList) {
+  return `
+    <table class="scores-table">
+      <tr>
+        <th>Label</th>
+        <th>Score</th>
+      </tr>
+    </table>
+  `;
 };
 
 $(CVA__.watchsubmit);
