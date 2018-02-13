@@ -1,4 +1,5 @@
 """The main python server which routes requests from the fontend to vapis."""
+import base64
 import logging
 import os
 import json
@@ -15,13 +16,23 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     autoescape=True)
 
 
-def make_google_data(url):
+def make_google_data(url=None, raw_image=None):
   """Constructs the data object for a post request to Google Vision API."""
   headers = {'Content-Type': 'application/json'}
-  image_data = {
-      "image": {"source": {"imageUri": url}},
-      "features": [{"type": "LABEL_DETECTION"}]
-  }
+  if url:
+    image_data = {
+        "image": {"source": {"imageUri": url}},
+        "features": [{"type": "LABEL_DETECTION"}]
+    }
+  else if raw_image:
+    encoded_image = base64.b64encode(raw_image)
+    image_data = {
+        "image": {"source": {"content": encoded_image}},
+        "features": [{"type": "LABEL_DETECTION", "maxResults": 1}]
+    }
+  else:
+    logging.error('Need an image or image data to send request')
+    return headers, json.dumps({})    
   data = {"requests": [image_data]}
   return headers, json.dumps(data)
 
