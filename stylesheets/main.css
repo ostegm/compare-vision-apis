@@ -26,6 +26,7 @@ h1 {
 
 .search-box label,
 .search-box input,
+.search-box select,
 .search-box button {
   display: block;
   width: 100%;
