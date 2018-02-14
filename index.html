@@ -9,18 +9,52 @@
   <h1>Compare Vision APIs</h1>
   <main role="main">
   	<div class="container">
-    <p>Test url: https://cdn.pixabay.com/photo/2015/02/05/12/09/chihuahua-624924_960_720.jpg</p>
 		<form action="" name="classify-form" class="search-box" method="post">
-			<label for="image-url">Enter an image URL to classify</label>
-			<input id ="image-url" type="text" name="image_url" placeholder="https://samples.clarifai.com/metro-north.jpg" required>
+      <label for="query-type">What do you want to do today?</label>
+      <select id="query-type">
+        <option value="text">Find an image on Pixabay and see classify it's contents.</option>
+        <option value="url">Label the contents of an image based on the URL</option>
+      </select>
+			<label for="query-url">Enter a phrase or an Image url</label>
+			<input id ="query-input" type="text" name="query" placeholder="e.g. 'Puppies'" required>
 			<button class="js-submit-image">Classify Image</button>
 		</form>
     </div>
-    <div class="js-clarifai-results" hidden></div>
-    <div class="google-results" hidden></div>
-    <div class="amazon-results" hidden></div>
+    <div class="results" hidden></div>
   </main>  
+
+<!-- Templates -->
+<div class="results-template" hidden>
+  <img class="result-image" src="" alt="">
+  <div class="results-item clarifai">
+    <h2>Clarifai Results</h2>
+  </div>
+  <div class="results-item google">
+      <h2>Google Results</h2>
+  </div>
+</div>
+
+
+<div class="scores-table template" hidden>
+  <div class="table100 ver1 m-b-110">
+    <table data-vertable="ver1">
+      <thead>
+        <tr class="row100 head">
+          <th class="column100 column1" data-column="column1">Object Label</th>
+          <th class="column100 column2" data-column="column2">Likelihood</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="row100">
+          <td class="column100 column1" data-column="column1">Lawrence Scott</td>
+          <td class="column100 column2" data-column="column2">8:00 AM</td>
+        </tr>     
+      </tbody>
+    </table>
+  </div>
+</div>
 </body>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js"></script>
 <script type="text/javascript" src="js/index.js"></script>
 </html>

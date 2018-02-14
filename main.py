@@ -1,10 +1,11 @@
 """The main python server which routes requests from the fontend to vapis."""
+import base64
+import io
 import logging
 import os
 import json
 import jinja2
 import webapp2
-from clarifai.rest import ClarifaiApp
 from google.appengine.ext import ndb
 import requests
 import requests_toolbelt.adapters.appengine
@@ -16,14 +17,27 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     autoescape=True)
 
 
-def make_google_data(url):
+def get_image_data(url):
+  return base64.b64encode(requests.get(url).content)
+
+def make_google_data(encoded_image):
   """Constructs the data object for a post request to Google Vision API."""
+  headers = {'Content-Type': 'application/json'}
   image_data = {
-      "image": {"source": {"imageUri": url}},
+      "image": {"content": encoded_image},
       "features": [{"type": "LABEL_DETECTION"}]
-  }
+    }
   data = {"requests": [image_data]}
-  return json.dumps(data)
+  return headers, json.dumps(data)
+
+def make_clarifai_data(url, auth_key):
+  """Constructs the data object for a post request to Clarifai."""
+  headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Key {}'.format(auth_key)
+  }
+  data = {"inputs": [{"data": {"image": {"url": url}}}]}
+  return headers, json.dumps(data)
 
 
 class Settings(ndb.Model):
@@ -43,8 +57,8 @@ class Settings(ndb.Model):
       retval.put()
     if retval.value == not_set_value:
       raise Exception(
-          'Setting %s not found in the database.' %(name) + 
-          'Use the app engine developer console and add a value.' 
+          'Setting %s not found in the database.' %(name) +
+          'Use the app engine developer console and add a value.'
       )
     return retval.value
 
@@ -62,16 +76,15 @@ class ClarifaiWrapper(webapp2.RequestHandler):
   """Wrapper class to send post request to Clarifai vision api."""
 
   def post(self):
-    """Responds to post request with clarifai prediction/"""
+    """Responds to post request with Clarifai prediction"""
     clarifai_key = Settings.get('CLARIFAI_API_KEY')
-    clarifai_app = ClarifaiApp(api_key=clarifai_key)
-    model = clarifai_app.models.get("general-v1.3")
     image_url = self.request.get('imageUrl')
-    prediction = model.predict_by_url(url=image_url)
-    logging.info('Prediction from clarifai app: %s', prediction)
-    self.response.headers['Content-Type'] = 'text/plain'
-    self.response.write(prediction)
-
+    headers, data = make_clarifai_data(image_url, clarifai_key)
+    url = 'https://api.clarifai.com/v2/models/aaa03c23b3724a16a56b629203edc62c/outputs'
+    r = requests.post(url, data=data, headers=headers)
+    logging.info('Response code from clarifai: %s', r.status_code)
+    self.response.headers['Content-Type'] = 'text/json'
+    self.response.write(r.content)
 
 class GoogleWrapper(webapp2.RequestHandler):
   """Wrapper class to send an image classification request to Google."""
@@ -79,17 +92,19 @@ class GoogleWrapper(webapp2.RequestHandler):
   def post(self):
     """Responds to post request with Google Vision API prediction"""
     google_key = Settings.get('GOOGLE_API_KEY')
-    headers = {
-        'Content-Type': 'application/json',
-    }
     image_url = self.request.get('imageUrl')
-    data = make_google_data(image_url)
     url = 'https://vision.googleapis.com/v1/images:annotate?key=' + google_key
-    response = requests.post(url, data=data, headers=headers)
-    self.response.headers['Content-Type'] = 'text/plain'
-    self.response.write(response.content)
+    logging.info('Trying to pull raw image and classify it.')
+    # Get raw image and sent to Google.
+    image_data = get_image_data(image_url)
+    headers, data = make_google_data(encoded_image=image_data)
+    r = requests.post(url, data=data, headers=headers)
+    logging.info('Response code from google: %s', r.status_code)
+    self.response.headers['Content-Type'] = 'text/json'
+    self.response.write(r.content)
+    
 
-app = webapp2.WSGIApplication([
+app = webapp2.WSGIApplication([  # pylint: disable=invalid-name
     ('/', MainPage),
     ('/clarifai', ClarifaiWrapper),
     ('/google', GoogleWrapper)
