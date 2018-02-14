@@ -1,5 +1,6 @@
 """The main python server which routes requests from the fontend to vapis."""
 import base64
+import io
 import logging
 import os
 import json
@@ -16,23 +17,16 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     autoescape=True)
 
 
-def make_google_data(url=None, raw_image=None):
+def get_image_data(url):
+  return base64.b64encode(requests.get(url).content)
+
+def make_google_data(encoded_image):
   """Constructs the data object for a post request to Google Vision API."""
   headers = {'Content-Type': 'application/json'}
-  if url:
-    image_data = {
-        "image": {"source": {"imageUri": url}},
-        "features": [{"type": "LABEL_DETECTION"}]
+  image_data = {
+      "image": {"content": encoded_image},
+      "features": [{"type": "LABEL_DETECTION"}]
     }
-  else if raw_image:
-    encoded_image = base64.b64encode(raw_image)
-    image_data = {
-        "image": {"source": {"content": encoded_image}},
-        "features": [{"type": "LABEL_DETECTION", "maxResults": 1}]
-    }
-  else:
-    logging.error('Need an image or image data to send request')
-    return headers, json.dumps({})    
   data = {"requests": [image_data]}
   return headers, json.dumps(data)
 
@@ -87,10 +81,10 @@ class ClarifaiWrapper(webapp2.RequestHandler):
     image_url = self.request.get('imageUrl')
     headers, data = make_clarifai_data(image_url, clarifai_key)
     url = 'https://api.clarifai.com/v2/models/aaa03c23b3724a16a56b629203edc62c/outputs'
-    response = requests.post(url, data=data, headers=headers)
-    logging.info('Prediction from clarifai: %s', response.content)
+    r = requests.post(url, data=data, headers=headers)
+    logging.info('Response code from clarifai: %s', r.status_code)
     self.response.headers['Content-Type'] = 'text/json'
-    self.response.write(response.content)
+    self.response.write(r.content)
 
 class GoogleWrapper(webapp2.RequestHandler):
   """Wrapper class to send an image classification request to Google."""
@@ -99,12 +93,16 @@ class GoogleWrapper(webapp2.RequestHandler):
     """Responds to post request with Google Vision API prediction"""
     google_key = Settings.get('GOOGLE_API_KEY')
     image_url = self.request.get('imageUrl')
-    headers, data = make_google_data(image_url)
     url = 'https://vision.googleapis.com/v1/images:annotate?key=' + google_key
-    response = requests.post(url, data=data, headers=headers)
-    logging.info('Prediction from google vision: %s', response.content)
+    logging.info('Trying to pull raw image and classify it.')
+    # Get raw image and sent to Google.
+    image_data = get_image_data(image_url)
+    headers, data = make_google_data(encoded_image=image_data)
+    r = requests.post(url, data=data, headers=headers)
+    logging.info('Response code from google: %s', r.status_code)
     self.response.headers['Content-Type'] = 'text/json'
-    self.response.write(response.content)
+    self.response.write(r.content)
+    
 
 app = webapp2.WSGIApplication([  # pylint: disable=invalid-name
     ('/', MainPage),
