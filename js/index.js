@@ -6,9 +6,9 @@ var CVA__ = {};
 CVA__.watchsubmit = function() {
   CVA__.watchPlaceholderText();
   const $form = $('.search-box');
-  const $resultsBox = $('.results')
   $form.submit(e => {
       e.preventDefault();
+      const $resultsBox = $('.results')
       $resultsBox.html($('.results-template').html())
       const queryText = $('#query-input').val();
       const queryType = $('#query-type').val();
@@ -131,8 +131,6 @@ CVA__.makeTable = function(labelsList) {
     $newRow.find('td').last().html(labelsList[i].score);
     $tbody.append($newRow);
   };
-  console.log($table.html());
-
   return $table.html();
 };
 
