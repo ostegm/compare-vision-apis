@@ -57,5 +57,7 @@ h1 {
   width: 120px;
   height: 120px;
   display: block;
-
+  max-width: 85%;
+  padding: 1em;
+  margin: 1em auto;
 }
