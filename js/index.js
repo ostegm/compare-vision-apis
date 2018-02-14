@@ -6,10 +6,12 @@ var CVA__ = {};
 CVA__.watchsubmit = function() {
   CVA__.watchPlaceholderText();
   const $form = $('.search-box');
+  const $resultsBox = $('.results');
+  const $resultsTemplate = $('.results-template').clone();
   $form.submit(e => {
       e.preventDefault();
-      const $resultsBox = $('.results')
-      $resultsBox.html($('.results-template').html())
+      $resultsBox.empty();
+      $resultsBox.html($resultsTemplate.html());
       const queryText = $('#query-input').val();
       const queryType = $('#query-type').val();
       if (queryType === 'url') {
