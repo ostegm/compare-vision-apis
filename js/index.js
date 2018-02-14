@@ -6,8 +6,10 @@ var CVA__ = {};
 CVA__.watchsubmit = function() {
   CVA__.watchPlaceholderText();
   const $form = $('.search-box');
+  const $resultsBox = $('.results')
   $form.submit(e => {
       e.preventDefault();
+      $resultsBox.html($('.results-template').html())
       const queryText = $('#query-input').val();
       const queryType = $('#query-type').val();
       if (queryType === 'url') {
@@ -16,6 +18,7 @@ CVA__.watchsubmit = function() {
         CVA__.handleTextQuery(queryText);
       }
     });
+  CVA__.handleTableInteractions();
 };
 
 CVA__.watchPlaceholderText = function() {
@@ -36,9 +39,9 @@ CVA__.handleUrlQuery = function(url) {
   console.log('User input a url, validation check returns:', urlOk);
   if (!urlOk) {
     alert(['It looks like you tried to input a url, but something went wrong.',
-           'If you would like to use a URL, it needs to point to a JPG or',
-           ,'PNG file. If you don\'t have a URL, just use a phrase and we',
-           ,'will find an image for you!'].join(''));
+           ' If you would like to use a URL, it needs to point to a JPG or',
+           ,' PNG file. If you don\'t have a URL, just use a phrase and we',
+           ,' will find an image for you!'].join(''));
     return;
   }
   // Good image url input from user, proceed with classifications requests.
@@ -119,17 +122,40 @@ CVA__.makeTable = function(labelsList) {
   $table.removeClass('template');
   $table.prop('hidden', false);
   // Grab the data row from the template. Save it for adding rows.
-  $dataRow = $table.find('tr').last().clone();
-  $table.find('tr').not(':first').remove();
-
+  $dataRow = $table.find('tbody tr').clone();
+  $table.find('tbody tr').remove();
+  $tbody = $table.find('tbody');
   for (let i = 0; i < labelsList.length; i++) {
     let $newRow = $dataRow.clone();
     $newRow.find('td').first().html(labelsList[i].label);
     $newRow.find('td').last().html(labelsList[i].score);
-    $table.append($newRow);
+    $tbody.append($newRow);
   };
+  console.log($table.html());
 
   return $table.html();
+};
+
+CVA__.handleTableInteractions = function() {
+  $('.column100').on('mouseover', function() {
+      var table1 = $(this).parent().parent().parent();
+      var table2 = $(this).parent().parent();
+      var verTable = $(table1).data('vertable') + '';
+      var column = $(this).data('column') + '';
+
+      $(table2).find('.' + column).addClass('hov-column-' + verTable);
+      $(table1).find('.row100.head .' + column).addClass('hov-column-head-' + verTable);
+    });
+
+  $('.column100').on('mouseout', function() {
+    var table1 = $(this).parent().parent().parent();
+    var table2 = $(this).parent().parent();
+    var verTable = $(table1).data('vertable') + '';
+    var column = $(this).data('column') + '';
+
+    $(table2).find('.' + column).removeClass('hov-column-' + verTable);
+    $(table1).find('.row100.head .' + column).removeClass('hov-column-head-' + verTable);
+  });
 };
 
 $(CVA__.watchsubmit);
