@@ -1,7 +1,10 @@
 `use strict`;
 
 // Object to control namespace issues.
-var CVA__ = {};
+const CVA__ = {
+  clarifaiResults: null,
+  googleResults: null,
+};
 
 CVA__.watchsubmit = function() {
   CVA__.watchSelector();
@@ -96,33 +99,43 @@ CVA__.googleRequest = function(data) {
   $.post('/google', data, function(response) {
     console.log('Sending image for classification to Google Vision.');
     const $container = $('.google');
-    const labelObjects = response.responses[0].labelAnnotations;
-    CVA__.parseClassificationResponse(
-      labelObjects, 'description', 'score', $container);
+    CVA__.googleResults = CVA__.parseClassificationResponse(
+      response.responses[0].labelAnnotations,
+      'description',
+      'score',
+      $container
+    );
+    const tableHtml = CVA__.makeTable(CVA__.googleResults);
+    $container.append(tableHtml);
   });
 };
 
 CVA__.clarifaiRequest = function(data) {
+  // Makes request to API, formats response and populates results.
   $.post('/clarifai', data, function(response) {
     console.log('Sending image for classification to clarifai.');
     const $container = $('.clarifai');
-    const labelObjects = response.outputs[0].data.concepts;
-    CVA__.parseClassificationResponse(
-      labelObjects, 'name', 'value', $container);
+    CVA__.clarifaiResults =  CVA__.parseClassificationResponse(
+      response.outputs[0].data.concepts,
+      'name',
+      'value',
+      $container
+    );
+    const tableHtml = CVA__.makeTable(CVA__.clarifaiResults);
+    $container.append(tableHtml);
   });
 };
 
 CVA__.parseClassificationResponse = function(
   labelObjects, labelFieldName, scoreFieldName, $container) {
+  // Parses the responses from vision apis into a common format.
   labelsList = labelObjects.map(function(i) {
     return {
       label: i[labelFieldName],
       score: i[scoreFieldName],
     };
   });
-
-  const tableHtml = CVA__.makeTable(labelsList);
-  $container.append(tableHtml);
+  return labelsList;
 };
 
 CVA__.makeTable = function(labelsList) {
@@ -136,7 +149,8 @@ CVA__.makeTable = function(labelsList) {
   for (let i = 0; i < labelsList.length; i++) {
     let $newRow = $dataRow.clone();
     $newRow.find('td').first().html(labelsList[i].label);
-    $newRow.find('td').last().html(labelsList[i].score);
+    scoreStr = labelsList[i].score.toLocaleString("en", {style: "percent"});
+    $newRow.find('td').last().html(scoreStr);
     $tbody.append($newRow);
   };
   return $table.html();
