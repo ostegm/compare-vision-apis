@@ -30,7 +30,7 @@ CVA__.watchSelector = function() {
   };
   const searchText = {
     text: 'Enter a phrase',
-    url: 'Enter the full URL to your image'
+    url: 'Enter your image URL'
   };
   $('#query-type').on('change', function() {
       currSelection = $('#query-type option:selected').val();
