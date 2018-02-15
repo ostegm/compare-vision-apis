@@ -4,7 +4,7 @@
 var CVA__ = {};
 
 CVA__.watchsubmit = function() {
-  CVA__.watchPlaceholderText();
+  CVA__.watchSelector();
   const $form = $('.search-box');
   const $resultsBox = $('.results');
   const $resultsTemplate = $('.results-template').clone();
@@ -23,14 +23,20 @@ CVA__.watchsubmit = function() {
   CVA__.handleTableInteractions();
 };
 
-CVA__.watchPlaceholderText = function() {
+CVA__.watchSelector = function() {
   const pText = {
     text: 'e.g. puppies',
     url: 'e.g. https://samples.clarifai.com/metro-north.jpg'
   };
+  const searchText = {
+    text: 'Enter a phrase',
+    url: 'Enter the full URL to your image'
+  };
   $('#query-type').on('change', function() {
       currSelection = $('#query-type option:selected').val();
+      $(`label[for='query-url']`).text(searchText[currSelection]);
       $('#query-input').prop('placeholder', pText[currSelection]);
+
     });
 };
 
