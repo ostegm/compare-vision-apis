@@ -20,13 +20,13 @@
         <option value="text">Find me an image from the web</option>
         <option value="url">I already have an image</option>
       </select>
-			<label for="query-url">Enter a phrase</label>
+			<label for="query-url" aria-live="assertive">Enter a phrase</label>
 			<input id ="query-input" type="text" name="query" placeholder="e.g. 'Puppies'" required>
 			<button class="js-submit-image">Classify Image</button>
 		</form>
     </div>
     <div class="container-wide">
-      <div class="results" hidden></div>
+      <div class="results" aria-live="assertive" hidden></div>
     </div>
   </main>  
 
