@@ -133,11 +133,27 @@ CVA__.clarifaiRequest = function(data) {
 CVA__.watchShowMore = function($container, containerName, labelsList) {
   $container.on('click', '.show-more', e => {
     e.preventDefault();
-    console.log('someone clicked show more.');
     const allResults = labelsList.length;
     const tableHtml = CVA__.makeTable(labelsList, allResults);
+    // Clear existing table and show more link.
     $(`${containerName} .table100`).remove();
+    $(`${containerName} a`).remove();
+    // Replace with new table and 'show less' link.
+    $container.append(`<a href="/" class="show-less">(Show less)</a>`);
     $container.append(tableHtml);
+    CVA__.watchShowLess($container, containerName, labelsList);
+  });
+};
+
+CVA__.watchShowLess = function($container, containerName, labelsList) {
+  $container.on('click', '.show-less', e => {
+    e.preventDefault();
+    const tableHtml = CVA__.makeTable(labelsList, 5);
+    $(`${containerName} .table100`).remove();
+    $(`${containerName} a`).remove();
+    $container.append(`<a href="/" class="show-more">(Show more)</a>`);
+    $container.append(tableHtml);
+    CVA__.watchShowMore($container, containerName, labelsList);
   });
 };
 
@@ -180,7 +196,8 @@ CVA__.handleTableInteractions = function() {
       var column = $(this).data('column') + '';
 
       $(table2).find('.' + column).addClass('hov-column-' + verTable);
-      $(table1).find('.row100.head .' + column).addClass('hov-column-head-' + verTable);
+      $(table1).find('.row100.head .' + column)
+               .addClass('hov-column-head-' + verTable);
     });
 
   $('.column100').on('mouseout', function() {
@@ -190,7 +207,8 @@ CVA__.handleTableInteractions = function() {
     var column = $(this).data('column') + '';
 
     $(table2).find('.' + column).removeClass('hov-column-' + verTable);
-    $(table1).find('.row100.head .' + column).removeClass('hov-column-head-' + verTable);
+    $(table1).find('.row100.head .' + column)
+             .removeClass('hov-column-head-' + verTable);
   });
 };
 
