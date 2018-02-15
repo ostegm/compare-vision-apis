@@ -252,3 +252,7 @@ h1 {
   margin-left: auto;
   margin-right: auto;
 }
+
+.show-more-google, .show-more-clarifai {
+  display: inline;
+}

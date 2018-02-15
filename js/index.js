@@ -106,7 +106,9 @@ CVA__.googleRequest = function(data) {
       $container
     );
     const tableHtml = CVA__.makeTable(CVA__.googleResults, 5);
+    $container.append(`<a href="/" class="show-more">(Show more)</a>`);
     $container.append(tableHtml);
+    CVA__.watchShowMore($container, '.google', CVA__.googleResults);
   });
 };
 
@@ -122,6 +124,19 @@ CVA__.clarifaiRequest = function(data) {
       $container
     );
     const tableHtml = CVA__.makeTable(CVA__.clarifaiResults, 5);
+    $container.append(`<a href="/" class="show-more">(Show more)</a>`);
+    $container.append(tableHtml);
+    CVA__.watchShowMore($container, '.clarifai', CVA__.clarifaiResults);
+  });
+};
+
+CVA__.watchShowMore = function($container, containerName, labelsList) {
+  $container.on('click', '.show-more', e => {
+    e.preventDefault();
+    console.log('someone clicked show more.');
+    const allResults = labelsList.length;
+    const tableHtml = CVA__.makeTable(labelsList, allResults);
+    $(`${containerName} .table100`).remove();
     $container.append(tableHtml);
   });
 };
@@ -150,7 +165,7 @@ CVA__.makeTable = function(labelsList, nResults) {
   for (let i = 0; i < nResults; i++) {
     let $newRow = $dataRow.clone();
     $newRow.find('td').first().html(labelsList[i].label);
-    scoreStr = labelsList[i].score.toLocaleString("en", {style: "percent"});
+    scoreStr = labelsList[i].score.toLocaleString('en', {style: 'percent'});
     $newRow.find('td').last().html(scoreStr);
     $tbody.append($newRow);
   };
