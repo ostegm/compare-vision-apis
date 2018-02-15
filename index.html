@@ -10,7 +10,7 @@
     <h1>Compare Vision APIs</h1>
   </header>
   <main role="main">
-  	<div class="container-wide background">
+  	<div class="container background">
       <p>Ever wonder how well machine learning works for labeling objects in images? Now's your chance to find out. Use the form below to find out what <a href="https://cloud.google.com/vision/">Google</a> and <a href="https://clarifai.com/">Clarifai's</a> Vision algorithms think are in your image.</p>
     </div>
     <div class="container">
@@ -32,9 +32,11 @@
 
 <!-- Templates -->
 <div class="results-template" hidden>
-  <h2>The image we sent:</h2>
-  <img class="result-image" src="" alt="">
-  <p class="results-explanation">The results below are the best guesses by two machine learning API's about what's in the image we provided. The labels represent concepts or objects and the likelihoods represent an indication of the algorithm's confidence in the result.</p>
+  <div class="container">
+    <h2>The image we sent:</h2>
+    <img class="result-image" src="" alt="">
+    <p class="results-explanation">The results below are the best guesses by two machine learning API's about what's in the image we provided. The labels represent concepts or objects and the likelihoods represent an indication of the algorithm's confidence in the result.</p>
+  </div>
   <div class="results-item clarifai">
     <h2>Top Clarifai Results</h2>
   </div>

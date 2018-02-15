@@ -36,6 +36,8 @@ a {
   -webkit-transition: all 0.4s;
   -o-transition: all 0.4s;
   -moz-transition: all 0.4s;
+  text-decoration: none;
+  color: #d3d3d3;
 }
 
 a:focus {
