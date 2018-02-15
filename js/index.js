@@ -106,9 +106,11 @@ CVA__.googleRequest = function(data) {
       $container
     );
     const tableHtml = CVA__.makeTable(CVA__.googleResults, 5);
-    $container.append(`<a href="/" class="show-more">(Show more)</a>`);
+    if (CVA__.googleResults.length > 5) {
+      $container.append(`<a href="/" class="show-more">(Show more)</a>`);
+      CVA__.watchShowMore($container, '.google', CVA__.googleResults);
+    }
     $container.append(tableHtml);
-    CVA__.watchShowMore($container, '.google', CVA__.googleResults);
   });
 };
 
@@ -124,9 +126,11 @@ CVA__.clarifaiRequest = function(data) {
       $container
     );
     const tableHtml = CVA__.makeTable(CVA__.clarifaiResults, 5);
-    $container.append(`<a href="/" class="show-more">(Show more)</a>`);
+    if (CVA__.clarifaiResults.length > 5) {
+      $container.append(`<a href="/" class="show-more">(Show more)</a>`);
+      CVA__.watchShowMore($container, '.clarifai', CVA__.clarifaiResults);
+    }
     $container.append(tableHtml);
-    CVA__.watchShowMore($container, '.clarifai', CVA__.clarifaiResults);
   });
 };
 

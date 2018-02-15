@@ -253,6 +253,8 @@ h1 {
   margin-right: auto;
 }
 
-.show-more-google, .show-more-clarifai {
-  display: inline;
+.results-item h2,
+.show-more a, 
+.show-less a{
+  display: inline-block;
 }
