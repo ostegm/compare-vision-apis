@@ -258,3 +258,15 @@ h1 {
 .show-less a{
   display: inline-block;
 }
+
+/* ----------------- Mobile, grid  ----------------- */
+@media only screen and (max-width: 640px) {
+  /* 3 columns, 3/12 in % */
+  .results-item {
+    width: 100%;
+  }
+
+  .container, .container-wide {
+    width: 100%l
+  }
+}
