@@ -83,8 +83,12 @@ class ClarifaiWrapper(webapp2.RequestHandler):
     url = 'https://api.clarifai.com/v2/models/aaa03c23b3724a16a56b629203edc62c/outputs'
     r = requests.post(url, data=data, headers=headers)
     logging.info('Response code from clarifai: %s', r.status_code)
-    self.response.headers['Content-Type'] = 'text/json'
-    self.response.write(r.content)
+    if r.status_code == 200:
+      self.response.headers['Content-Type'] = 'text/json'
+      self.response.write(r.content)
+    else:
+      self.response.set_status(400)
+
 
 class GoogleWrapper(webapp2.RequestHandler):
   """Wrapper class to send an image classification request to Google."""
@@ -100,9 +104,12 @@ class GoogleWrapper(webapp2.RequestHandler):
     headers, data = make_google_data(encoded_image=image_data)
     r = requests.post(url, data=data, headers=headers)
     logging.info('Response code from google: %s', r.status_code)
-    self.response.headers['Content-Type'] = 'text/json'
-    self.response.write(r.content)
-    
+    if r.status_code == 200:
+      self.response.headers['Content-Type'] = 'text/json'
+      self.response.write(r.content)
+    else:
+      self.response.set_status(400)
+
 
 app = webapp2.WSGIApplication([  # pylint: disable=invalid-name
     ('/', MainPage),

@@ -75,7 +75,11 @@ CVA__.validateURL = function(url) {
 
 CVA__.classifyPixabayImageUrl = function(requestUrl) {
   const encodedUrl = encodeURI(requestUrl);
-  responseUrl = $.get(encodedUrl, function(response) {
+  $.get(encodedUrl, function(response) {
+    if (response.hits.length == 0) {
+      alert('Sorry, We couldn\'t find an image for that query, try another.');
+      return;
+    }
     CVA__.classifyImage(response.hits[0].webformatURL);
   });
 };
