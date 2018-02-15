@@ -9,11 +9,12 @@
   <h1>Compare Vision APIs</h1>
   <main role="main">
   	<div class="container">
+    <p>Compare how two different computer vision api's handle an image. Just give us an image or a phrase and we'll show what the machine learning algorithms think is in your image.</p>
 		<form action="" name="classify-form" class="search-box" method="post">
-      <label for="query-type">What do you want to do today?</label>
+      <label for="query-type">Which image should we use?</label>
       <select id="query-type">
-        <option value="text">Find an image on Pixabay and see classify it's contents.</option>
-        <option value="url">Label the contents of an image based on the URL</option>
+        <option value="text">Find an image on Pixabay and label it's contents.</option>
+        <option value="url">Label the contents of an image based on the URL.</option>
       </select>
 			<label for="query-url">Enter a phrase or an Image url</label>
 			<input id ="query-input" type="text" name="query" placeholder="e.g. 'Puppies'" required>
