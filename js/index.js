@@ -77,6 +77,7 @@ CVA__.classifyPixabayImageUrl = function(requestUrl) {
   const encodedUrl = encodeURI(requestUrl);
   $.get(encodedUrl, function(response) {
     if (response.hits.length == 0) {
+      $('.results').empty();
       alert('Sorry, We couldn\'t find an image for that query, try another.');
       return;
     }
@@ -97,6 +98,9 @@ CVA__.showImageAndResults = function(url) {
   $('.results').prop('hidden', false);
   $img = $('.result-image');
   $img.prop('src', url).prop('alt', 'An image input by the user.');
+  $('html, body').animate({
+    scrollTop: $('.results').offset().top
+  }, 2000);
 };
 
 CVA__.googleRequest = function(data) {

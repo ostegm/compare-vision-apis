@@ -261,6 +261,11 @@ h1 {
   display: inline-block;
 }
 
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 /* ----------------- Mobile, grid  ----------------- */
 @media only screen and (max-width: 640px) {
   /* 3 columns, 3/12 in % */
