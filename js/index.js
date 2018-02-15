@@ -1,15 +1,20 @@
 `use strict`;
 
 // Object to control namespace issues.
-var CVA__ = {};
+const CVA__ = {
+  clarifaiResults: null,
+  googleResults: null,
+};
 
 CVA__.watchsubmit = function() {
-  CVA__.watchPlaceholderText();
+  CVA__.watchSelector();
   const $form = $('.search-box');
-  const $resultsBox = $('.results')
+  const $resultsBox = $('.results');
+  const $resultsTemplate = $('.results-template').clone();
   $form.submit(e => {
       e.preventDefault();
-      $resultsBox.html($('.results-template').html())
+      $resultsBox.empty();
+      $resultsBox.html($resultsTemplate.html());
       const queryText = $('#query-input').val();
       const queryType = $('#query-type').val();
       if (queryType === 'url') {
@@ -21,14 +26,20 @@ CVA__.watchsubmit = function() {
   CVA__.handleTableInteractions();
 };
 
-CVA__.watchPlaceholderText = function() {
+CVA__.watchSelector = function() {
   const pText = {
     text: 'e.g. puppies',
     url: 'e.g. https://samples.clarifai.com/metro-north.jpg'
   };
+  const searchText = {
+    text: 'Enter a phrase',
+    url: 'Enter your image URL'
+  };
   $('#query-type').on('change', function() {
       currSelection = $('#query-type option:selected').val();
+      $(`label[for='query-url']`).text(searchText[currSelection]);
       $('#query-input').prop('placeholder', pText[currSelection]);
+
     });
 };
 
@@ -64,7 +75,12 @@ CVA__.validateURL = function(url) {
 
 CVA__.classifyPixabayImageUrl = function(requestUrl) {
   const encodedUrl = encodeURI(requestUrl);
-  responseUrl = $.get(encodedUrl, function(response) {
+  $.get(encodedUrl, function(response) {
+    if (response.hits.length == 0) {
+      $('.results').empty();
+      alert('Sorry, We couldn\'t find an image for that query, try another.');
+      return;
+    }
     CVA__.classifyImage(response.hits[0].webformatURL);
   });
 };
@@ -82,42 +98,91 @@ CVA__.showImageAndResults = function(url) {
   $('.results').prop('hidden', false);
   $img = $('.result-image');
   $img.prop('src', url).prop('alt', 'An image input by the user.');
+  $('html, body').animate({
+    scrollTop: $('.results').offset().top
+  }, 2000);
 };
 
 CVA__.googleRequest = function(data) {
   $.post('/google', data, function(response) {
     console.log('Sending image for classification to Google Vision.');
     const $container = $('.google');
-    const labelObjects = response.responses[0].labelAnnotations;
-    CVA__.parseClassificationResponse(
-      labelObjects, 'description', 'score', $container);
+    CVA__.googleResults = CVA__.parseClassificationResponse(
+      response.responses[0].labelAnnotations,
+      'description',
+      'score',
+      $container
+    );
+    const tableHtml = CVA__.makeTable(CVA__.googleResults, 5);
+    if (CVA__.googleResults.length > 5) {
+      $container.append(`<a href="/" class="show-more">(Show more)</a>`);
+      CVA__.watchShowMore($container, '.google', CVA__.googleResults);
+    }
+    $container.append(tableHtml);
   });
 };
 
 CVA__.clarifaiRequest = function(data) {
+  // Makes request to API, formats response and populates results.
   $.post('/clarifai', data, function(response) {
     console.log('Sending image for classification to clarifai.');
     const $container = $('.clarifai');
-    const labelObjects = response.outputs[0].data.concepts;
-    CVA__.parseClassificationResponse(
-      labelObjects, 'name', 'value', $container);
+    CVA__.clarifaiResults =  CVA__.parseClassificationResponse(
+      response.outputs[0].data.concepts,
+      'name',
+      'value',
+      $container
+    );
+    const tableHtml = CVA__.makeTable(CVA__.clarifaiResults, 5);
+    if (CVA__.clarifaiResults.length > 5) {
+      $container.append(`<a href="/" class="show-more">(Show more)</a>`);
+      CVA__.watchShowMore($container, '.clarifai', CVA__.clarifaiResults);
+    }
+    $container.append(tableHtml);
+  });
+};
+
+CVA__.watchShowMore = function($container, containerName, labelsList) {
+  $container.on('click', '.show-more', e => {
+    e.preventDefault();
+    const allResults = labelsList.length;
+    const tableHtml = CVA__.makeTable(labelsList, allResults);
+    // Clear existing table and show more link.
+    $(`${containerName} .table100`).remove();
+    $(`${containerName} a`).remove();
+    // Replace with new table and 'show less' link.
+    $container.append(`<a href="/" class="show-less">(Show less)</a>`);
+    $container.append(tableHtml);
+    CVA__.watchShowLess($container, containerName, labelsList);
+  });
+};
+
+CVA__.watchShowLess = function($container, containerName, labelsList) {
+  $container.on('click', '.show-less', e => {
+    e.preventDefault();
+    const tableHtml = CVA__.makeTable(labelsList, 5);
+    $(`${containerName} .table100`).remove();
+    $(`${containerName} a`).remove();
+    $container.append(`<a href="/" class="show-more">(Show more)</a>`);
+    $container.append(tableHtml);
+    CVA__.watchShowMore($container, containerName, labelsList);
   });
 };
 
 CVA__.parseClassificationResponse = function(
   labelObjects, labelFieldName, scoreFieldName, $container) {
+  // Parses the responses from vision apis into a common format.
   labelsList = labelObjects.map(function(i) {
     return {
       label: i[labelFieldName],
       score: i[scoreFieldName],
     };
   });
-
-  const tableHtml = CVA__.makeTable(labelsList);
-  $container.append(tableHtml);
+  return labelsList;
 };
 
-CVA__.makeTable = function(labelsList) {
+CVA__.makeTable = function(labelsList, nResults) {
+  nResults = Math.min(labelsList.length, nResults);
   $table = $('.scores-table.template').clone();
   $table.removeClass('template');
   $table.prop('hidden', false);
@@ -125,14 +190,13 @@ CVA__.makeTable = function(labelsList) {
   $dataRow = $table.find('tbody tr').clone();
   $table.find('tbody tr').remove();
   $tbody = $table.find('tbody');
-  for (let i = 0; i < labelsList.length; i++) {
+  for (let i = 0; i < nResults; i++) {
     let $newRow = $dataRow.clone();
     $newRow.find('td').first().html(labelsList[i].label);
-    $newRow.find('td').last().html(labelsList[i].score);
+    scoreStr = labelsList[i].score.toLocaleString('en', {style: 'percent'});
+    $newRow.find('td').last().html(scoreStr);
     $tbody.append($newRow);
   };
-  console.log($table.html());
-
   return $table.html();
 };
 
@@ -144,7 +208,8 @@ CVA__.handleTableInteractions = function() {
       var column = $(this).data('column') + '';
 
       $(table2).find('.' + column).addClass('hov-column-' + verTable);
-      $(table1).find('.row100.head .' + column).addClass('hov-column-head-' + verTable);
+      $(table1).find('.row100.head .' + column)
+               .addClass('hov-column-head-' + verTable);
     });
 
   $('.column100').on('mouseout', function() {
@@ -154,7 +219,8 @@ CVA__.handleTableInteractions = function() {
     var column = $(this).data('column') + '';
 
     $(table2).find('.' + column).removeClass('hov-column-' + verTable);
-    $(table1).find('.row100.head .' + column).removeClass('hov-column-head-' + verTable);
+    $(table1).find('.row100.head .' + column)
+             .removeClass('hov-column-head-' + verTable);
   });
 };
 

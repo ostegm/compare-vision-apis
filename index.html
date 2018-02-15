@@ -6,37 +6,49 @@
   <title>Compare Vision APIs</title>
 </head>
 <body>
-  <h1>Compare Vision APIs</h1>
+  <header role="banner">
+    <h1>Compare Vision APIs</h1>
+  </header>
   <main role="main">
-  	<div class="container">
-		<form action="" name="classify-form" class="search-box" method="post">
-      <label for="query-type">What do you want to do today?</label>
+  	<div class="container background">
+      <p>Ever wonder how well machine learning works for labeling objects in images? Now's your chance to find out. Use the form below to find out what <a href="https://cloud.google.com/vision/">Google</a> and <a href="https://clarifai.com/">Clarifai's</a> Vision algorithms think are in your image.</p>
+    </div>
+    <div class="container">
+      <form action="" name="classify-form" class="search-box" method="post">
+      <label for="query-type">Which image should we use?</label>
       <select id="query-type">
-        <option value="text">Find an image on Pixabay and see classify it's contents.</option>
-        <option value="url">Label the contents of an image based on the URL</option>
+        <option value="text">Find me an image from the web</option>
+        <option value="url">I already have an image</option>
       </select>
-			<label for="query-url">Enter a phrase or an Image url</label>
+			<label for="query-url">Enter a phrase</label>
 			<input id ="query-input" type="text" name="query" placeholder="e.g. 'Puppies'" required>
 			<button class="js-submit-image">Classify Image</button>
 		</form>
     </div>
-    <div class="results" hidden></div>
+    <div class="container-wide">
+      <div class="results" hidden></div>
+    </div>
   </main>  
 
 <!-- Templates -->
 <div class="results-template" hidden>
-  <img class="result-image" src="" alt="">
+  <div class="container">
+    <h2>The image we sent:</h2>
+    <img class="result-image" src="" alt="">
+    <p class="results-explanation">The results below are the best guesses by two machine learning API's about what's in the image we provided. The labels represent concepts or objects and the likelihoods represent an indication of the algorithm's confidence in the result.</p>
+  </div>
   <div class="results-item clarifai">
-    <h2>Clarifai Results</h2>
+    <h2>Top Clarifai Results</h2>
   </div>
   <div class="results-item google">
-      <h2>Google Results</h2>
+      <h2>Top Google Results</h2>
   </div>
 </div>
 
 
 <div class="scores-table template" hidden>
   <div class="table100 ver1 m-b-110">
+    <div class="loader"></div>
     <table data-vertable="ver1">
       <thead>
         <tr class="row100 head">
@@ -55,6 +67,5 @@
 </div>
 </body>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js"></script>
 <script type="text/javascript" src="js/index.js"></script>
 </html>

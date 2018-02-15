@@ -36,6 +36,8 @@ a {
   -webkit-transition: all 0.4s;
   -o-transition: all 0.4s;
   -moz-transition: all 0.4s;
+  text-decoration: none;
+  color: #d3d3d3;
 }
 
 a:focus {
@@ -191,8 +193,18 @@ h1 {
   margin-left: 30px;
 }
 
+.background {
+  text-align: center;
+}
+
 .container {
   max-width: 45%;
+  padding: 1em;
+  margin: 1em auto;
+}
+
+.container-wide {
+  max-width: 85%;
   padding: 1em;
   margin: 1em auto;
 }
@@ -203,12 +215,13 @@ h1 {
 .search-box button {
   display: block;
   width: 100%;
-  font-size: 18px; 
+  font-size: 14px; 
   margin-bottom: 5px;
   min-height: 25px;
 }
 
 .search-box label {
+  text-transform: uppercase;
   font-size: 22px;
 }
 
@@ -222,17 +235,45 @@ h1 {
 
 .results-item {
   display: inline-block;
-  width: 400px;
-  min-height: 400px;
+  width: 45%;
+  min-height: 200px;
+  padding: 20px;
+}
+
+.results-explanation {
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 .results img {
-  width: 120px;
-  height: 120px;
+  width: 300px;
   display: block;
   max-width: 85%;
   padding: 1em;
   margin: 1em auto;
   margin-left: auto;
   margin-right: auto;
+}
+
+.results-item h2,
+.show-more a, 
+.show-less a{
+  display: inline-block;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ----------------- Mobile, grid  ----------------- */
+@media only screen and (max-width: 640px) {
+  /* 3 columns, 3/12 in % */
+  .results-item {
+    width: 100%;
+  }
+
+  .container, .container-wide {
+    width: 100%l
+  }
 }
