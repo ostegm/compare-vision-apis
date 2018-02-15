@@ -105,7 +105,7 @@ CVA__.googleRequest = function(data) {
       'score',
       $container
     );
-    const tableHtml = CVA__.makeTable(CVA__.googleResults);
+    const tableHtml = CVA__.makeTable(CVA__.googleResults, 5);
     $container.append(tableHtml);
   });
 };
@@ -121,7 +121,7 @@ CVA__.clarifaiRequest = function(data) {
       'value',
       $container
     );
-    const tableHtml = CVA__.makeTable(CVA__.clarifaiResults);
+    const tableHtml = CVA__.makeTable(CVA__.clarifaiResults, 5);
     $container.append(tableHtml);
   });
 };
@@ -138,7 +138,8 @@ CVA__.parseClassificationResponse = function(
   return labelsList;
 };
 
-CVA__.makeTable = function(labelsList) {
+CVA__.makeTable = function(labelsList, nResults) {
+  nResults = Math.min(labelsList.length, nResults);
   $table = $('.scores-table.template').clone();
   $table.removeClass('template');
   $table.prop('hidden', false);
@@ -146,7 +147,7 @@ CVA__.makeTable = function(labelsList) {
   $dataRow = $table.find('tbody tr').clone();
   $table.find('tbody tr').remove();
   $tbody = $table.find('tbody');
-  for (let i = 0; i < labelsList.length; i++) {
+  for (let i = 0; i < nResults; i++) {
     let $newRow = $dataRow.clone();
     $newRow.find('td').first().html(labelsList[i].label);
     scoreStr = labelsList[i].score.toLocaleString("en", {style: "percent"});
